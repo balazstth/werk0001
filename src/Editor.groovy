@@ -8,6 +8,10 @@
 //  More editor functions (may require more advanced input-handling)
 //  Zoom in/out with Ctrl+Mouse wheel
 //  Persistent text highlighter
+//  Command line support
+// TODO 2.0
+//  File browser
+//  Multiple editor tabs
 
 import javax.swing.*
 import java.awt.Font
