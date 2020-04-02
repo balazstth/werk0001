@@ -1,11 +1,13 @@
 
-// Groovy Program to create a text editor
+// A basic text editor in Groovy
 // Written by TBA
 
 // TODO
 //  Undo, Redo
-//  Zoom
 //  Save warning on close
+//  More editor functions (may require more advanced input-handling)
+//  Zoom in/out with Ctrl+Mouse wheel
+//  Persistent text highlighter
 
 import javax.swing.*
 import java.awt.Font
@@ -17,21 +19,24 @@ class Editor extends JFrame implements ActionListener {
 
     JTextArea jTextArea
     JFrame jFrame
+    Font font
 
     def cmd = [file: "File",
                new: "New", open: "Open", save: "Save", print: "Print", close: "Close",
                edit: "Edit",
-               copy: "Copy", paste: "Paste", cut: "Cut"]
+               copy: "Copy", paste: "Paste", cut: "Cut",
+               preferences: "Preferences",
+               zoomIn: "Zoom in", zoomOut: "Zoom out"]
 
     def msg = [title: "Editor",
                allGood: "All good.",
                errLookAndFeel: "Could not set look and feel and window theme."]
 
     def cfg = [currentDir: ".",
-               width: 800,
-               height: 600,
+               width: 1200,
+               height: 900,
                fontName: "IBMPlexMono-Regular.ttf",
-               fontSize: 12f,
+               fontSize: 13f,
                lookAndFeel: "javax.swing.plaf.metal.MetalLookAndFeel",
                theme: new OceanTheme()]
 
@@ -59,7 +64,7 @@ class Editor extends JFrame implements ActionListener {
 
         // Load font
         InputStream is = Editor.class.getResourceAsStream(cfg.fontName)
-        Font font = Font.createFont(Font.TRUETYPE_FONT, is)
+        font = Font.createFont(Font.TRUETYPE_FONT, is)
         Font sizedFont = font.deriveFont(cfg.fontSize)
 
         // -------------------------------------------------
@@ -69,6 +74,7 @@ class Editor extends JFrame implements ActionListener {
         jTextArea.setFont(sizedFont)
         def jScrollPane = new JScrollPane(jTextArea)
 
+        //==================================================
         // Create a menu bar
         def menuBar = new JMenuBar()
 
@@ -146,10 +152,38 @@ class Editor extends JFrame implements ActionListener {
         mEdit.add(miPaste)
         mEdit.add(miCut)
 
+        // Create preferences menu -------------------------
+        def mPreferences = new JMenu(cmd.preferences)
+
+        mPreferences.setMnemonic('P')
+
+        // Create menu items
+        def miZoomIn = new JMenuItem(cmd.zoomIn)
+        def miZoomOut = new JMenuItem(cmd.zoomOut)
+
+        miZoomIn.setMnemonic('I')
+        miZoomOut.setMnemonic('O')
+
+        // For the sake of supporting most keyboard sizes and layouts, Alt+I and Alt+O
+        miZoomIn.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_I, InputEvent.ALT_DOWN_MASK))
+        miZoomOut.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_O, InputEvent.ALT_DOWN_MASK))
+
+        // Add action listener
+        miZoomIn.addActionListener(this)
+        miZoomOut.addActionListener(this)
+
+        mPreferences.add(miZoomIn)
+        mPreferences.add(miZoomOut)
+
         // -------------------------------------------------
 
         menuBar.add(mFile)
         menuBar.add(mEdit)
+        menuBar.add(mPreferences)
+
+        //==================================================
 
         jFrame.setJMenuBar(menuBar)
         jFrame.add(jScrollPane)
@@ -228,6 +262,20 @@ class Editor extends JFrame implements ActionListener {
     }
 
     // =======================================================================
+    def zoomIn() {
+        cfg.fontSize += 1f
+        Font sizedFont = font.deriveFont((float) cfg.fontSize)
+        jTextArea.setFont(sizedFont)
+    }
+
+    // =======================================================================
+    def zoomOut() {
+        if (cfg.fontSize >= 6f) cfg.fontSize -= 1f
+        Font sizedFont = font.deriveFont((float) cfg.fontSize)
+        jTextArea.setFont(sizedFont)
+    }
+
+    // =======================================================================
     // Menu functions
     void actionPerformed(ActionEvent evt) {
         String command = evt.getActionCommand()
@@ -242,6 +290,9 @@ class Editor extends JFrame implements ActionListener {
             case cmd.copy: jTextArea.copy(); break
             case cmd.paste: jTextArea.paste(); break
             case cmd.cut: jTextArea.cut(); break
+
+            case cmd.zoomIn: zoomIn(); break
+            case cmd.zoomOut: zoomOut(); break
         }
     }
 
