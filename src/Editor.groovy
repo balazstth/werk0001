@@ -38,7 +38,7 @@ class Editor extends JFrame implements ActionListener {
 
     def cfg = [currentDir: ".",
                width: 1200,
-               height: 900,
+               height: 825,
                fontName: "IBMPlexMono-Regular.ttf",
                fontSize: 13f,
                lookAndFeel: "javax.swing.plaf.metal.MetalLookAndFeel",
