@@ -15,15 +15,12 @@
 //  Multiple editor tabs
 
 import javax.swing.*
-import javax.swing.text.DefaultHighlighter
-import javax.swing.text.Highlighter
-import java.awt.Color
 import java.awt.Font
 import java.awt.event.*
 import java.awt.Toolkit
 import javax.swing.plaf.metal.*
 
-class Editor extends JFrame implements ActionListener {
+class EditorRSyntax extends JFrame implements ActionListener {
 
     JTextArea jTextArea
     JFrame jFrame
@@ -59,7 +56,7 @@ class Editor extends JFrame implements ActionListener {
     }
 
     // =======================================================================
-    Editor() {
+    EditorRSyntax() {
         jFrame = new JFrame(msg.title)
         jFrame.setDefaultCloseOperation(EXIT_ON_CLOSE)
 
@@ -74,7 +71,7 @@ class Editor extends JFrame implements ActionListener {
         }
 
         // Load font
-        InputStream is = Editor.class.getResourceAsStream(cfg.fontName)
+        InputStream is = EditorRSyntax.class.getResourceAsStream(cfg.fontName)
         font = Font.createFont(Font.TRUETYPE_FONT, is)
         Font sizedFont = font.deriveFont(cfg.fontSize)
 
@@ -309,6 +306,7 @@ class Editor extends JFrame implements ActionListener {
     }
 
     static void main(String... args) {
-        def editor = new Editor()
+        def editor = new EditorRSyntax()
     }
+
 }

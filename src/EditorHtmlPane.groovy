@@ -15,10 +15,9 @@
 //  Multiple editor tabs
 
 // TODO JTextArea --> JEditorPane
-//  Copy, Paste, Cut fix for nbsp, tab, etc.
-//  Save fix for nbsp, HTML, etc.
-//  Highlighter integration on input et al.
-//  Scroll location fix on text changing events?
+//  HTML --> text on save
+//  Cursor location fix at the end of highlighting process, in edge cases
+//  Optional: scroll location fix on text changing events
 
 import javax.swing.*
 import javax.swing.event.DocumentEvent
@@ -126,7 +125,7 @@ class EditorHtmlPane extends JFrame implements ActionListener {
         }
 
         // Load font
-        InputStream is = Editor.class.getResourceAsStream(cfg.fontName)
+        InputStream is = EditorHtmlPane.class.getResourceAsStream(cfg.fontName)
         font = Font.createFont(Font.TRUETYPE_FONT, is)
         Font sizedFont = font.deriveFont(cfg.fontSize)
 
