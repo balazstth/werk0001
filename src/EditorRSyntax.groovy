@@ -14,6 +14,12 @@
 //  File browser
 //  Multiple editor tabs
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants
+import org.fife.ui.rtextarea.CaretStyle
+import org.fife.ui.rtextarea.ConfigurableCaret
+import org.fife.ui.rtextarea.RTextScrollPane
+
 import javax.swing.*
 import java.awt.Font
 import java.awt.event.*
@@ -22,7 +28,7 @@ import javax.swing.plaf.metal.*
 
 class EditorRSyntax extends JFrame implements ActionListener {
 
-    JTextArea jTextArea
+    RSyntaxTextArea rSyntaxTextArea
     JFrame jFrame
     Font font
 
@@ -44,9 +50,11 @@ class EditorRSyntax extends JFrame implements ActionListener {
                fontSize: 13f,
                lookAndFeel: "javax.swing.plaf.metal.MetalLookAndFeel",
                theme: new OceanTheme(),
-               caretWidth: 2,
                syntaxHighlight: true,
-               tabWidth: 4]
+               tabWidth: 4,
+               tabEmulated: true,
+               wordWrap: true,
+               codeFolding: false]
 
     // =======================================================================
     // Panic out of the program
@@ -78,10 +86,18 @@ class EditorRSyntax extends JFrame implements ActionListener {
         // -------------------------------------------------
 
         // Text component
-        jTextArea = new JTextArea()
-        jTextArea.setFont(sizedFont)
-        jTextArea.putClientProperty("caretWidth", cfg.caretWidth)
-        def jScrollPane = new JScrollPane(jTextArea)
+        rSyntaxTextArea = new RSyntaxTextArea()
+        // Basic config
+        rSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_GROOVY)
+        rSyntaxTextArea.setCodeFoldingEnabled(cfg.codeFolding)
+        rSyntaxTextArea.setFont(sizedFont)
+        rSyntaxTextArea.setTabSize(cfg.tabWidth)
+        rSyntaxTextArea.setTabsEmulated(cfg.tabEmulated)
+        rSyntaxTextArea.setLineWrap(cfg.wordWrap)
+        rSyntaxTextArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.BLOCK_STYLE)
+        // TODO: Custom scheme, B&W, bold highlighting, common elements like numbers,
+        //  braces, maybe strings
+        def rTextScrollPane = new RTextScrollPane(rSyntaxTextArea)
 
         //==================================================
         // Create a menu bar
@@ -195,7 +211,7 @@ class EditorRSyntax extends JFrame implements ActionListener {
         //==================================================
 
         jFrame.setJMenuBar(menuBar)
-        jFrame.add(jScrollPane)
+        jFrame.add(rTextScrollPane)
         jFrame.setSize(cfg.width, cfg.height)
         jFrame.setVisible(true)
     }
@@ -221,11 +237,12 @@ class EditorRSyntax extends JFrame implements ActionListener {
                 while ((line = bufReader.readLine()) != null) {
                     textBuffer += "\n" + line
                 }
+                textBuffer += "\n"
 
                 // Set the text in the editor
-                jTextArea.setText(textBuffer)
+                rSyntaxTextArea.setText(textBuffer)
                 // Cursor back to top
-                jTextArea.setCaretPosition(0)
+                rSyntaxTextArea.setCaretPosition(0)
             } catch (Exception evt) {
                 JOptionPane.showMessageDialog(jFrame, evt.getMessage())
             }
@@ -245,7 +262,7 @@ class EditorRSyntax extends JFrame implements ActionListener {
                 FileWriter fileWriter = new FileWriter(file, false)
                 BufferedWriter bufWriter = new BufferedWriter(fileWriter)
 
-                bufWriter.write(jTextArea.getText())
+                bufWriter.write(rSyntaxTextArea.getText())
 
                 bufWriter.flush()
                 bufWriter.close()
@@ -258,7 +275,7 @@ class EditorRSyntax extends JFrame implements ActionListener {
     // =======================================================================
     def printFile() {
         try {
-            jTextArea.print()
+            rSyntaxTextArea.print()
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(jFrame, ex.getMessage())
         }
@@ -274,14 +291,14 @@ class EditorRSyntax extends JFrame implements ActionListener {
     def zoomIn() {
         cfg.fontSize += 1f
         Font sizedFont = font.deriveFont((float) cfg.fontSize)
-        jTextArea.setFont(sizedFont)
+        rSyntaxTextArea.setFont(sizedFont)
     }
 
     // =======================================================================
     def zoomOut() {
         if (cfg.fontSize >= 6f) cfg.fontSize -= 1f
         Font sizedFont = font.deriveFont((float) cfg.fontSize)
-        jTextArea.setFont(sizedFont)
+        rSyntaxTextArea.setFont(sizedFont)
     }
 
     // =======================================================================
@@ -290,15 +307,15 @@ class EditorRSyntax extends JFrame implements ActionListener {
         String command = evt.getActionCommand()
 
         switch(command) {
-            case cmd.new: jTextArea.setText(""); break
+            case cmd.new: rSyntaxTextArea.setText(""); break
             case cmd.open: openFile(); break
             case cmd.save: saveFile(); break
             case cmd.print: printFile(); break
             case cmd.close: close(); break
 
-            case cmd.copy: jTextArea.copy(); break
-            case cmd.paste: jTextArea.paste(); break
-            case cmd.cut: jTextArea.cut(); break
+            case cmd.copy: rSyntaxTextArea.copy(); break
+            case cmd.paste: rSyntaxTextArea.paste(); break
+            case cmd.cut: rSyntaxTextArea.cut(); break
 
             case cmd.zoomIn: zoomIn(); break
             case cmd.zoomOut: zoomOut(); break
